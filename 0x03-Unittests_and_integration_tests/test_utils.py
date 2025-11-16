@@ -7,6 +7,26 @@ import unittest
 from parameterized import parameterized
 from utils import access_nested_map
 
+>>> from utils import access_nested_map
+>>> access_nested_map({}, ('a',))
+KeyError: 'a'
+>>> str(access_nested_map({}, ('a',)))
+"'a'"
+
+
+@parameterized.expand([
+    ({}, ("a",), "'a'"),
+    ({"a": 1}, ("a", "b"), "'b'"),
+])
+
+
+with self.assertRaises(KeyError) as err:
+    access_nested_map(nested_map, path)
+self.assertEqual(err.exception.args[0], path[-1])
+
+
+
+
 
 class TestAccessNestedMap(unittest.TestCase):
     """Tests for the access_nested_map function."""
