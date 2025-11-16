@@ -139,3 +139,66 @@ class TestGetJson(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+
+
+# utils.py
+from functools import wraps
+from typing import Callable
+
+def memoize(fn: Callable) -> Callable:
+    """Decorator that caches a method's return value."""
+    attr_name = "_memoized_value"
+
+    @wraps(fn)
+    def wrapper(self):
+        if not hasattr(self, attr_name):
+            setattr(self, attr_name, fn(self))
+        return getattr(self, attr_name)
+    return wrapper
+
+
+#!/usr/bin/env python3
+"""
+Unit test for the utils.memoize decorator
+"""
+
+import unittest
+from unittest.mock import patch
+from utils import memoize
+
+class TestMemoize(unittest.TestCase):
+    """Test class for utils.memoize decorator."""
+
+    def test_memoize(self):
+        """Test that a memoized method only calls the original method once."""
+
+        class TestClass:
+            """Sample class to test memoization."""
+
+            def a_method(self):
+                return 42
+
+            @memoize
+            def a_property(self):
+                return self.a_method()
+
+        test_obj = TestClass()
+
+        # Patch 'a_method' on test_obj
+        with patch.object(TestClass, "a_method", return_value=42) as mock_method:
+            # Call the memoized property twice
+            result1 = test_obj.a_property
+            result2 = test_obj.a_property
+
+            # Assert results are correct
+            self.assertEqual(result1, 42)
+            self.assertEqual(result2, 42)
+
+            # Assert that a_method was called only once
+            mock_method.assert_called_once()
+
+
+if __name__ == "__main__":
+    unittest.main()
